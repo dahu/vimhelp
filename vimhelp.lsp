@@ -9,6 +9,12 @@
 ;;
 ;; DISCLAIMER: THE WORKS ARE WITHOUT WARRANTY.
 
+(define PCRE          0)
+(define PCRE_CASELESS 1)
+
+;; All remaining 0,1,2,3 are list indexes
+;; except for the 0 values used in the heuristic calculations.
+
 ;; tags from $VIMRUNTIME/doc/tags
 (setf vim-help-tags
  (clean empty? (map (fn (x) (parse x "\t"))
@@ -49,11 +55,11 @@
          (t (replace {.} t {\.}))
          (t (replace {*} t {.*}))
          (t (replace {?} t {.}))
-         (t (replace {\^([[:alpha:]])} t (string {ctrl-} $1) 1))
-         (t (replace {([^_\\])ctrl-} t (string $1 {_ctrl-}) 1))
-         (t (replace {^\s*('\w+').*} t $1 0)) ;; These two cases really only
-         (t (replace {^\s*`(.+?)`.*} t $1 0)));; apply to in-help navigation
-                                              ;; and are not really necessary here.
+         (t (replace {\^([[:alpha:]])} t (string {ctrl-} $1) PCRE_CASELESS))
+         (t (replace {([^_\\])ctrl-} t (string $1 {_ctrl-}) PCRE_CASELESS))
+         (t (replace {^\s*('\w+').*} t $1 PCRE)) ;; These two cases really only
+         (t (replace {^\s*`(.+?)`.*} t $1 PCRE)));; apply to in-help navigation
+                                                 ;; and are not really necessary here.
   t))
 
 (define (vim-rules tag)
@@ -64,16 +70,17 @@
 ;; returns the set of vim-tags with a tag name containing `tag`
 ;; result-set format: (tag-name file-name search-pattern)
 (define (find-tags tag)
- (clean string? (ref-all tag vim-help-tags (fn (x y) (!= nil (regex x (y 0) 1))) true)))
+  (clean string?  (ref-all tag vim-help-tags
+    (fn (x y) (!= nil (regex x (y 0) PCRE_CASELESS))) true)))
 
 ;; based on the help_heuristic() code in Vim's ex_cmd.c
 (define (help-heuristic tag tag-result)
   (letn ((tag-name (tag-result 0))
-         (score (* 100 (length (replace {[^[:alnum:]]} (copy tag-name) "" 0))))
+         (score (* 100 (length (replace {[^[:alnum:]]} (copy tag-name) "" PCRE))))
          (score (+ score (* 100 (length tag-name))))
-         (score (+ score (* 1000 (find tag tag-name 1))))
-         (score (+ score (if (!= nil (find tag tag-name 1)) 0 5000)))
-         (score (+ score (if (!= nil (regex {^\+\w} tag-name 1)) 0 100))))
+         (score (+ score (* 1000 (find tag tag-name PCRE_CASELESS))))
+         (score (+ score (if (!= nil (find tag tag-name PCRE_CASELESS)) 0 5000)))
+         (score (+ score (if (!= nil (regex {^\+\w} tag-name PCRE_CASELESS)) 0 100))))
   (push score tag-result -1)))
 
 (define (ordered-tags tag)
@@ -81,7 +88,7 @@
     (sort (map (curry help-heuristic t) (find-tags t)) (fn (x y) (<= (x 3) (y 3))))))
 
 (define (url-encode str)
-  (replace {([^a-zA-Z0-9])} str (format "%%%2X" (char $1)) 0))
+  (replace {([^a-zA-Z0-9])} str (format "%%%2X" (char $1)) PCRE))
 
 (define (tag-to-url tag-result)
  (let ((tag-name (tag-result 0))
@@ -94,7 +101,8 @@
          (tag-to-url (first matches))
          (string ":help " key " -> E149: Sorry, no help for " key))))
 
+;; (main-args) => (newlisp-interpreter script-name commandline-arguments)
 (if (> (length (main-args)) 2)
   (begin
     (println (vimhelp (trim ((main-args) 2))))
-    (exit 0)))
+    (exit)))
