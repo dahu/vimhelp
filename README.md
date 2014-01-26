@@ -1,15 +1,18 @@
-vimhelp
--------
+## vimhelp
 
 Emulates Vim's `:help tag` lookup system.
-Requires http://www.newlisp.org/
+Requires [newLISP](http://www.newlisp.org/)
 
-Usage:
+**Usage:**
 
-  > ./vimhelp '^x'
+```
+> ./vimhelp '^x'
+```
 
 Will return a URL for appspot's online Vim documentation for CTRL-X
 
 To run the bundled unit tests:
 
-  > newlisp ./test-vimhelp.lsp
+```
+> newlisp ./test-vimhelp.lsp
+```
