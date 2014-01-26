@@ -1,0 +1,6 @@
+vimhelp
+-------
+
+Emulates Vim's `:help tag` lookup system.
+Requires http://www.newlisp.org/
+
