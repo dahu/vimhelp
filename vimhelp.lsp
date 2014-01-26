@@ -96,5 +96,5 @@
 
 (if (> (length (main-args)) 2)
   (begin
-    (println (vimhelp ((main-args) 2)))
+    (println (vimhelp (trim ((main-args) 2))))
     (exit 0)))
