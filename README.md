@@ -1,7 +1,8 @@
 ## vimhelp
 
 Emulates Vim's `:help tag` lookup system.
-Requires [newLISP](http://www.newlisp.org/)
+
+**Note:** Requires [newLISP](http://www.newlisp.org/)
 
 **Usage:**
 

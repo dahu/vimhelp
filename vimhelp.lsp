@@ -20,7 +20,7 @@
  (clean empty? (map (fn (x) (parse x "\t"))
                 (sort (parse (read-file "tags") "\n")))))
 
-;; The [mr]table combo was taken from Vim's ex_cmd.c in find_help_tags()
+;; The [mr]table combo was taken from Vim's ex_cmds.c in find_help_tags()
 ;; Some of the alterations may not apply to newlisp's PCRE based regex engine.
 (setf mtable '({*} {g*} {[*} {]*} {:*}
                {/*} {/\\*} {\"*} {**}
@@ -39,8 +39,9 @@
                {\[pattern]} {\\bar} {/\\%\\$}))
 
 (define (rule-exceptions tag)
- ;; the [mr]table pair encode exceptions to the rule  catch will return true if
- ;; the tag was found in mtable and set t to the corresponding rtable entry
+ ;; The [mr]table pair encode exceptions to the rule,
+ ;; Catch will return true if the tag was found in mtable
+ ;; and set t to the corresponding rtable entry.
  (or (and (catch (rtable (find tag mtable)) 't) t) tag))
 
 (define (escape str chars)
@@ -73,7 +74,7 @@
   (clean string?  (ref-all tag vim-help-tags
     (fn (x y) (!= nil (regex x (y 0) PCRE_CASELESS))) true)))
 
-;; based on the help_heuristic() code in Vim's ex_cmd.c
+;; based on the help_heuristic() code in Vim's ex_cmds.c
 (define (help-heuristic tag tag-result)
   (letn ((tag-name (tag-result 0))
          (score (* 100 (length (replace {[^[:alnum:]]} (copy tag-name) "" PCRE))))
